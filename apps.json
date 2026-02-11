@@ -12,7 +12,7 @@
     "name": "GitHub Pages Manager",
     "icon": "fa-solid fa-file-lines",
     "color": "purple",
-    "link": "/github-pages.html",
+    "link": "github-pages.html",
     "description": "Edit and publish pages."
   },
   {
@@ -20,7 +20,7 @@
     "name": "Repo Size Manager",
     "icon": "fa-solid fa-database",
     "color": "green",
-    "link": "/github-repo-size.html",
+    "link": "github-repo-size.html",
     "description": "Monitor repository storage."
   },
   {
@@ -28,7 +28,7 @@
     "name": "JSON MODIFY & ADD",
     "icon": "fa-solid fa-key",
     "color": "orange",
-    "link": "/modify-add-json.html",
+    "link": "modify-add-json.html",
     "description": "Manage authentication data."
   },
   {
@@ -36,7 +36,7 @@
     "name": "Only add json ",
     "icon": "fa-solid fa-database",
     "color": "Blue ",
-    "link": "/only-add.html",
+    "link": "only-add.html",
     "description": ""
   },
   {
@@ -55,4 +55,4 @@
     "link": "https://nabendudebnathbharatiya-bot.github.io/my-app-assets/",
     "description": ""
   }
-]
+    ]
