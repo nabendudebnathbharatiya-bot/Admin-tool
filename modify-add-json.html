@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fixed Header JSON Editor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; overscroll-behavior: none; }
+        
+        /* ফিক্সড হেডার এবং ট্যাবের জন্য প্যাডিং */
+        .content-area {
+            padding-top: 115px; /* Header (60px) + Tabs (55px) */
+            padding-bottom: 80px; /* FAB Button space */
+            height: 100vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .tab-active { border-bottom: 3px solid #2563eb; color: #2563eb; font-weight: bold; background: #eff6ff; }
+        .tab-inactive { color: #64748b; background: white; }
+    </style>
+</head>
+<body class="h-screen bg-gray-100 overflow-hidden">
+
+    <div class="fixed top-0 left-0 w-full z-50 bg-white shadow-md">
+        
+        <header class="flex justify-between items-center px-4 h-[60px] border-b border-gray-100">
+            <div class="flex items-center gap-2">
+                <div class="bg-blue-600 text-white w-8 h-8 rounded flex items-center justify-center">
+                    <i class="fa-solid fa-layer-group"></i>
+                </div>
+                <div>
+                    <h1 class="text-sm font-bold text-gray-800 leading-tight">JSON Editor</h1>
+                    <p class="text-[10px] text-gray-500" id="statusText">Ready</p>
+                </div>
+            </div>
+            
+            <button onclick="copyFinalJson()" class="bg-green-600 active:bg-green-700 text-white px-4 py-2 rounded shadow font-bold text-sm flex items-center gap-2 transition-transform active:scale-95">
+                <span>Copy</span> <i class="fa-regular fa-copy"></i>
+            </button>
+        </header>
+
+        <div class="flex text-sm font-medium border-b border-gray-200 h-[55px]">
+            <button onclick="switchTab('input')" id="tab-input" class="flex-1 flex items-center justify-center gap-2 tab-active transition-all">
+                <i class="fa-solid fa-code"></i> 1. Input
+            </button>
+            <button onclick="switchTab('editor')" id="tab-editor" class="flex-1 flex items-center justify-center gap-2 tab-inactive transition-all relative">
+                <i class="fa-solid fa-pen-to-square"></i> 2. Visual Edit
+                <span id="itemCount" class="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full hidden ml-1">0</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="content-area w-full px-4">
+        
+        <div id="view-input" class="h-full flex flex-col">
+            <div class="bg-blue-50 border border-blue-200 rounded p-3 mb-3 text-xs text-blue-800 flex justify-between items-center">
+                <span><i class="fa-solid fa-info-circle mr-1"></i> Paste your JSON here first.</span>
+                <button onclick="clearInput()" class="text-red-500 font-bold hover:underline">Clear</button>
+            </div>
+            <textarea id="rawInput" class="w-full flex-1 p-4 border border-gray-300 rounded-lg text-xs font-mono focus:ring-2 focus:ring-blue-500 outline-none resize-none shadow-inner leading-relaxed" placeholder='Example:
+[
+  { "title": "Page 1", "link": "url.com" },
+  { "title": "Page 2", "link": "url.com" }
+]'></textarea>
+        </div>
+
+        <div id="view-editor" class="hidden pb-20">
+            <div id="editorList" class="space-y-4">
+                </div>
+            
+            <div id="emptyState" class="hidden flex-col items-center justify-center py-20 text-gray-400">
+                <i class="fa-regular fa-folder-open text-4xl mb-3"></i>
+                <p class="text-sm">No data found.</p>
+                <button onclick="switchTab('input')" class="mt-4 text-blue-600 font-bold text-sm">Go to Input</button>
+            </div>
+        </div>
+
+    </div>
+
+    <button id="fabAdd" onclick="addNewItem()" class="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-2xl flex items-center justify-center text-xl z-50 transition-transform active:scale-90 hidden border-4 border-gray-100">
+        <i class="fa-solid fa-plus"></i>
+    </button>
+
+    <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full shadow-xl text-sm font-bold transition-all opacity-0 translate-y-[-20px] pointer-events-none z-[60]">
+        <i class="fa-solid fa-check-circle text-green-400 mr-2"></i> Copied to Clipboard!
+    </div>
+
+    <script>
+        let jsonData = [];
+        let currentView = 'input';
+
+        const rawInput = document.getElementById('rawInput');
+        const editorList = document.getElementById('editorList');
+        const emptyState = document.getElementById('emptyState');
+        const fabAdd = document.getElementById('fabAdd');
+        const itemCountBadge = document.getElementById('itemCount');
+        const statusText = document.getElementById('statusText');
+
+        // --- Tabs Logic ---
+        function switchTab(view) {
+            currentView = view;
+            const inputView = document.getElementById('view-input');
+            const editorView = document.getElementById('view-editor');
+            const tabInput = document.getElementById('tab-input');
+            const tabEditor = document.getElementById('tab-editor');
+
+            if (view === 'input') {
+                inputView.classList.remove('hidden');
+                editorView.classList.add('hidden');
+                fabAdd.classList.add('hidden');
+                
+                tabInput.className = "flex-1 flex items-center justify-center gap-2 tab-active transition-all";
+                tabEditor.className = "flex-1 flex items-center justify-center gap-2 tab-inactive transition-all";
+                
+                // Sync back to input
+                if(jsonData.length > 0) {
+                     rawInput.value = JSON.stringify(jsonData, null, 2);
+                     statusText.innerText = "Editing Raw JSON";
+                }
+
+            } else {
+                // Try to load
+                if (loadJson()) {
+                    inputView.classList.add('hidden');
+                    editorView.classList.remove('hidden');
+                    fabAdd.classList.remove('hidden');
+
+                    tabInput.className = "flex-1 flex items-center justify-center gap-2 tab-inactive transition-all";
+                    tabEditor.className = "flex-1 flex items-center justify-center gap-2 tab-active transition-all";
+                    statusText.innerText = "Visual Mode";
+                }
+            }
+        }
+
+        function loadJson() {
+            const val = rawInput.value.trim();
+            
+            if (!val) {
+                jsonData = [];
+                renderList();
+                return true; 
+            }
+
+            try {
+                const parsed = JSON.parse(val);
+                if (!Array.isArray(parsed)) {
+                    jsonData = [parsed]; // Force array
+                } else {
+                    jsonData = parsed;
+                }
+                renderList();
+                return true;
+            } catch (e) {
+                alert("Invalid JSON format! Please check brackets/commas.");
+                return false;
+            }
+        }
+
+        function renderList() {
+            editorList.innerHTML = '';
+            itemCountBadge.innerText = jsonData.length;
+            itemCountBadge.classList.remove('hidden');
+
+            if (jsonData.length === 0) {
+                emptyState.classList.remove('hidden');
+                emptyState.classList.add('flex');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+                emptyState.classList.remove('flex');
+            }
+
+            jsonData.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-4 rounded-xl shadow-sm border border-gray-200 relative animate-fade-in";
+                
+                // Header inside card
+                const header = document.createElement('div');
+                header.className = "flex justify-between items-center mb-3 pb-2 border-b border-gray-100";
+                header.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-1 rounded">#${index + 1}</span>
+                    </div>
+                    <button onclick="deleteItem(${index})" class="text-gray-300 hover:text-red-500 p-2 -mr-2">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                `;
+                card.appendChild(header);
+
+                // Fields
+                const fieldsDiv = document.createElement('div');
+                fieldsDiv.className = "grid gap-3";
+
+                Object.keys(item).forEach(key => {
+                    const wrapper = document.createElement('div');
+                    
+                    const label = document.createElement('label');
+                    label.innerText = key;
+                    label.className = "block text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-wider";
+                    
+                    const input = document.createElement('input');
+                    input.type = "text";
+                    input.value = item[key];
+                    input.className = "w-full bg-gray-50 border border-gray-200 rounded px-3 py-2.5 text-sm text-gray-800 font-medium focus:outline-none focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-200 transition-all";
+                    
+                    // Live Update
+                    input.oninput = (e) => {
+                        item[key] = e.target.value; 
+                    };
+
+                    wrapper.appendChild(label);
+                    wrapper.appendChild(input);
+                    fieldsDiv.appendChild(wrapper);
+                });
+
+                card.appendChild(fieldsDiv);
+                editorList.appendChild(card);
+            });
+        }
+
+        function addNewItem() {
+            let newItem = {};
+            if (jsonData.length > 0) {
+                const template = jsonData[0];
+                Object.keys(template).forEach(k => newItem[k] = "");
+            } else {
+                newItem = { "id": "", "name": "", "link": "" };
+            }
+
+            jsonData.push(newItem);
+            renderList();
+            
+            // Scroll to bottom smoothly
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+
+        function deleteItem(index) {
+            if (confirm("Delete this item?")) {
+                jsonData.splice(index, 1);
+                renderList();
+            }
+        }
+
+        function copyFinalJson() {
+            // Update raw input first to ensure sync
+            rawInput.value = JSON.stringify(jsonData, null, 2);
+            
+            // Select and Copy
+            rawInput.select();
+            rawInput.setSelectionRange(0, 99999); // For mobile
+            
+            navigator.clipboard.writeText(rawInput.value).then(() => {
+                showToast();
+            }).catch(() => {
+                // Fallback
+                document.execCommand('copy');
+                showToast();
+            });
+        }
+
+        function clearInput() {
+            if(confirm("Clear all data?")) {
+                rawInput.value = "";
+                jsonData = [];
+                renderList();
+            }
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.remove('opacity-0', 'translate-y-[-20px]');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-[-20px]');
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

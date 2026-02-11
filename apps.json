@@ -1,0 +1,58 @@
+[
+  {
+    "id": "01",
+    "name": "MY DIRECTORY MAP",
+    "icon": "fa-solid fa-folder-tree",
+    "color": "blue",
+    "link": "https://nabendudebnathbharatiya-bot.github.io/Main-diectory-map/",
+    "description": "Manage all digital assets."
+  },
+  {
+    "id": "02",
+    "name": "GitHub Pages Manager",
+    "icon": "fa-solid fa-file-lines",
+    "color": "purple",
+    "link": "/github-pages.html",
+    "description": "Edit and publish pages."
+  },
+  {
+    "id": "03",
+    "name": "Repo Size Manager",
+    "icon": "fa-solid fa-database",
+    "color": "green",
+    "link": "/github-repo-size.html",
+    "description": "Monitor repository storage."
+  },
+  {
+    "id": "04",
+    "name": "JSON MODIFY & ADD",
+    "icon": "fa-solid fa-key",
+    "color": "orange",
+    "link": "/modify-add-json.html",
+    "description": "Manage authentication data."
+  },
+  {
+    "id": "05",
+    "name": "Only add json ",
+    "icon": "fa-solid fa-database",
+    "color": "Blue ",
+    "link": "/only-add.html",
+    "description": ""
+  },
+  {
+    "id": "06",
+    "name": "My pdf assets",
+    "icon": "fa-solid fa-database",
+    "color": "Red",
+    "link": "https://nabendudebnathbharatiya-bot.github.io/My-pdf-assets/",
+    "description": ""
+  },
+  {
+    "id": "07",
+    "name": "My app assets",
+    "icon": "fa-solid fa-database",
+    "color": "Red",
+    "link": "https://nabendudebnathbharatiya-bot.github.io/my-app-assets/",
+    "description": ""
+  }
+]

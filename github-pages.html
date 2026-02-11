@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Pages Finder</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --card: #161b22;
+            --border: #30363d;
+            --text: #c9d1d9;
+            --link: #58a6ff;
+            --btn: #238636;
+            --btn-copy: #1f6feb;
+        }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; max-width: 800px; margin: 0 auto; }
+        
+        h1 { text-align: center; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+        
+        .search-box {
+            display: flex; gap: 10px; margin-bottom: 30px;
+            background: var(--card); padding: 20px; border-radius: 6px; border: 1px solid var(--border);
+        }
+        
+        input {
+            flex-grow: 1; padding: 10px; background: #0d1117; border: 1px solid var(--border);
+            color: white; border-radius: 6px; font-size: 1rem;
+        }
+        
+        button {
+            padding: 10px 20px; border: none; border-radius: 6px; 
+            font-weight: bold; cursor: pointer; color: white; transition: 0.2s;
+        }
+        .btn-find { background: var(--btn); }
+        .btn-visit { background: var(--btn); font-size: 0.9rem; padding: 5px 15px; }
+        .btn-copy { background: var(--btn-copy); font-size: 0.9rem; padding: 5px 15px; margin-right: 5px; }
+        
+        button:hover { opacity: 0.9; }
+
+        .results { display: grid; gap: 15px; }
+        
+        .repo-card {
+            background: var(--card); padding: 15px; border-radius: 6px; border: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+        }
+        
+        .repo-info h3 { margin: 0 0 5px 0; font-size: 1.1rem; color: var(--link); }
+        .repo-link { color: #8b949e; text-decoration: none; font-size: 0.9rem; font-family: monospace; word-break: break-all; }
+        
+        .badge {
+            background: var(--border); color: var(--text); padding: 2px 8px; 
+            border-radius: 12px; font-size: 0.8rem; margin-left: 10px;
+        }
+
+        /* Toast Notification */
+        #toast {
+            visibility: hidden; min-width: 200px; background-color: var(--btn); color: #fff; 
+            text-align: center; border-radius: 4px; padding: 10px; position: fixed; z-index: 100; 
+            left: 50%; bottom: 30px; transform: translateX(-50%);
+        }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+    </style>
+</head>
+<body>
+
+    <h1>🕵️‍♂️ GitHub Pages Finder
+    copy usernane: nabendudebnathbharatiya-bot</h1>
+
+    <div class="search-box">
+        <input type="text" id="username" placeholder="Enter GitHub Username...">
+        <button class="btn-find" onclick="findPages()">Find Sites</button>
+    </div>
+
+    <div id="results" class="results">
+        <p style="text-align:center; color:#8b949e;">Enter a username to see their live sites.</p>
+    </div>
+
+    <div id="toast">Link Copied!</div>
+
+    <script>
+        async function findPages() {
+            const user = document.getElementById('username').value.trim();
+            const resultDiv = document.getElementById('results');
+            
+            if(!user) return alert("Please enter a username!");
+
+            resultDiv.innerHTML = '<p style="text-align:center;">Searching GitHub...</p>';
+
+            try {
+                // Fetch repositories
+                const response = await fetch(`https://api.github.com/users/${user}/repos?per_page=100&sort=updated`);
+                
+                if (!response.ok) {
+                    if(response.status === 403) throw new Error("Rate limit exceeded! Try again in 1 hour.");
+                    throw new Error("User not found!");
+                }
+                
+                const repos = await response.json();
+                const pagesSites = repos.filter(repo => repo.has_pages);
+
+                resultDiv.innerHTML = '';
+
+                if (pagesSites.length === 0) {
+                    resultDiv.innerHTML = '<p style="text-align:center; color:red;">No active GitHub Pages found.</p>';
+                    return;
+                }
+
+                pagesSites.forEach(repo => {
+                    const pageUrl = `https://${user}.github.io/${repo.name}/`;
+
+                    const card = document.createElement('div');
+                    card.className = 'repo-card';
+                    card.innerHTML = `
+                        <div class="repo-info">
+                            <h3>${repo.name} <span class="badge">⭐ ${repo.stargazers_count}</span></h3>
+                            <div class="repo-link">${pageUrl}</div>
+                        </div>
+                        <div class="actions">
+                            <button class="btn-copy" onclick="copyLink('${pageUrl}')">📋 Copy</button>
+                            <button class="btn-visit" onclick="window.open('${pageUrl}', '_blank')">Visit 🚀</button>
+                        </div>
+                    `;
+                    resultDiv.appendChild(card);
+                });
+
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="text-align:center; color:red;">Error: ${error.message}</p>`;
+            }
+        }
+
+        function copyLink(url) {
+            navigator.clipboard.writeText(url).then(() => {
+                const toast = document.getElementById("toast");
+                toast.className = "show";
+                setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 2500);
+            });
+        }
+    </script>
+</body>
+</html>

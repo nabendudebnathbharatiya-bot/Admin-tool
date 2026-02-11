@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Repo Size Checker</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; padding: 20px; text-align: center; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        input { padding: 10px; width: 60%; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px; }
+        button { padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background-color: #218838; }
+        table { width: 100%; margin-top: 20px; border-collapse: collapse; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #f8f9fa; }
+        .loading { color: blue; font-weight: bold; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>GitHub Repository Size Checker</h2>
+    <p>আপনার ইউজার আইডি দিয়ে রিপোজিটরির সাইজ দেখুন (MB-তে)  nabendudebnathbharatiya-bot</p>
+    
+    <input type="text" id="username" placeholder="GitHub Username লিখুন (যেমন: torvalds)">
+    <button onclick="fetchRepos()">সাইজ দেখুন</button>
+
+    <div id="status" class="loading" style="display:none;">লোডিং হচ্ছে...</div>
+    <div id="repo-list"></div>
+</div>
+
+<script>
+    async function fetchRepos() {
+        const username = document.getElementById('username').value;
+        const statusDiv = document.getElementById('status');
+        const listDiv = document.getElementById('repo-list');
+
+        if (!username) {
+            alert("দয়া করে একটি ইউজারনেম দিন!");
+            return;
+        }
+
+        statusDiv.style.display = 'block';
+        listDiv.innerHTML = '';
+
+        try {
+            const response = await fetch(`https://api.github.com/users/${username}/repos?per_page=100`);
+            
+            if (!response.ok) {
+                throw new Error("ইউজার পাওয়া যায়নি বা লিমিট শেষ!");
+            }
+
+            const repos = await response.json();
+            statusDiv.style.display = 'none';
+
+            if (repos.length === 0) {
+                listDiv.innerHTML = "<p class='error'>কোনো পাবলিক রিপোজিটরি পাওয়া যায়নি।</p>";
+                return;
+            }
+
+            let tableHtml = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Repo Name</th>
+                            <th>Size (MB)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            repos.forEach(repo => {
+                // GitHub API size দেয় KB-তে, আমরা একে 1024 দিয়ে ভাগ করে MB করলাম
+                const sizeInMB = (repo.size / 1024).toFixed(2);
+                tableHtml += `
+                    <tr>
+                        <td><a href="${repo.html_url}" target="_blank">${repo.name}</a></td>
+                        <td><strong>${sizeInMB} MB</strong></td>
+                    </tr>
+                `;
+            });
+
+            tableHtml += `</tbody></table>`;
+            listDiv.innerHTML = tableHtml;
+
+        } catch (error) {
+            statusDiv.style.display = 'none';
+            listDiv.innerHTML = `<p class="error">ভুল হয়েছে: ${error.message}</p>`;
+        }
+    }
+</script>
+
+</body>
+</html>

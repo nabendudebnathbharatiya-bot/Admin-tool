@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "title": "Modern Workspace",
+    "image": "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80",
+    "link": "https://unsplash.com"
+  },
+  {
+    "id": 2,
+    "title": "Data Analytics",
+    "image": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80",
+    "link": "https://google.com"
+  },
+  {
+    "id": 3,
+    "title": "Code Development",
+    "image": "https://images.unsplash.com/photo-1555099962-4199c345e5dd?w=800&q=80",
+    "link": "https://github.com"
+  },
+  {
+    "id": 4,
+    "title": "Cyber Security",
+    "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80",
+    "link": "https://vercel.com"
+  },
+  {
+    "id": 5,
+    "title": "Server Management",
+    "image": "https://images.unsplash.com/photo-1504384308090-c54be3855833?w=800&q=80",
+    "link": "https://stackoverflow.com"
+  }
+]

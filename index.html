@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Management Pro</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Poppins', 'sans-serif'] },
+                    colors: {
+                        primary: '#6366f1',
+                        secondary: '#8b5cf6',
+                        glass: 'rgba(255, 255, 255, 0.65)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { -webkit-tap-highlight-color: transparent; }
+        
+        /* Glassmorphism */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .dark .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Hide Scrollbar */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Animations */
+        .ad-slide { display: none; animation: fadeIn 0.5s ease-in-out; }
+        .ad-slide.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0.8; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+
+        .app-card { transition: all 0.3s ease; }
+        .app-card:active { transform: scale(0.96); }
+        
+        /* Loading Spinner */
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #6366f1; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300 pb-20">
+  <header class="fixed top-0 left-0 w-full z-50 glass-panel shadow-md">
+        <div class="max-w-md mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div>
+                    <h1 class="text-sm font-bold leading-tight">Admin<br>Management Pro</h1>
+                </div>
+            </div>
+            <a href="https://chakra-login-app.vercel.app/" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 border border-red-200 text-xs font-semibold">
+                <span>Back</span> <i class="fa-solid fa-right-from-bracket"></i>
+            </a>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto pt-[70px] px-4">
+        
+        <section class="mt-2 mb-4 relative rounded-xl overflow-hidden shadow-lg h-32 bg-gray-200 dark:bg-gray-800 group">
+            <div id="ad-container" class="w-full h-full relative flex items-center justify-center">
+                <div class="loader"></div> </div>
+            <button onclick="changeAd(-1)" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 backdrop-blur-sm z-10"><i class="fa-solid fa-chevron-left"></i></button>
+            <button onclick="changeAd(1)" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 backdrop-blur-sm z-10"><i class="fa-solid fa-chevron-right"></i></button>
+        </section>
+
+        <section class="mb-6 sticky top-[65px] z-40">
+            <div class="relative">
+                <input type="text" id="searchInput" placeholder="Search by Name or ID..." class="w-full pl-10 pr-4 py-3 rounded-2xl bg-white dark:bg-gray-800 shadow-md text-sm outline-none transition-all focus:ring-2 focus:ring-primary/50">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-2 gap-4 pb-4" id="cardContainer">
+            <div class="col-span-2 text-center py-10 text-gray-400">Loading Apps...</div>
+        </section>
+
+        <div id="noResults" class="hidden text-center py-10 text-gray-400"><i class="fa-regular fa-face-frown text-2xl mb-2"></i><p>No apps found</p></div>
+    </main>
+
+    <nav class="fixed bottom-0 left-0 w-full bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 shadow-lg z-50">
+        <div class="max-w-md mx-auto px-6 py-2 flex justify-between items-center">
+            <button class="flex flex-col items-center text-primary"><i class="fa-solid fa-grid-2 text-lg"></i><span class="text-[10px]">Home</span></button>
+            <div class="relative -top-5"><button onclick="document.getElementById('searchInput').focus()" class="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-secondary text-white shadow-lg flex items-center justify-center transform active:scale-95 transition-transform"><i class="fa-solid fa-magnifying-glass"></i></button></div>
+            <button onclick="toggleDarkMode()" class="flex flex-col items-center text-gray-400 hover:text-primary"><i id="themeIcon" class="fa-solid fa-moon text-lg"></i><span class="text-[10px]">Theme</span></button>
+        </div>
+    </nav>
+    <script>
+        // ================= CONFIG & INIT =================
+        let slideIndex = 0;
+        let autoSlideInterval;
+        const adContainer = document.getElementById('ad-container');
+        const cardContainer = document.getElementById('cardContainer');
+
+        // App Start
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 1. Check Dark Mode
+            if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                const icon = document.getElementById('themeIcon');
+                if(icon) icon.className = "fa-solid fa-sun text-lg";
+            }
+
+            // 2. Fetch Data
+            await loadAds();
+            await loadApps();
+        });
+
+        // ================= FETCH ADS =================
+        async function loadAds() {
+            try {
+                const response = await fetch('ads.json');
+                const ads = await response.json();
+                
+                adContainer.innerHTML = ''; // Clear loader
+                
+                ads.forEach((ad, index) => {
+                    const slide = document.createElement('a');
+                    slide.href = ad.link;
+                    slide.className = `ad-slide w-full h-full block ${index === 0 ? 'active' : ''}`;
+                    slide.style.display = index === 0 ? 'block' : 'none';
+                    slide.innerHTML = `
+                        <img src="${ad.image}" class="w-full h-full object-cover" alt="${ad.title}">
+                        <div class="absolute bottom-0 left-0 bg-black/50 text-white text-[10px] px-2 py-1 backdrop-blur-sm">Ad: ${ad.title}</div>
+                    `;
+                    adContainer.appendChild(slide);
+                });
+
+                if(ads.length > 0) startAutoSlide();
+
+            } catch (error) {
+                console.error("Error loading ads:", error);
+                adContainer.innerHTML = '<div class="text-xs text-red-500">Ad Error</div>';
+            }
+        }
+
+        // ================= FETCH APPS =================
+        async function loadApps() {
+            try {
+                const response = await fetch('apps.json');
+                const apps = await response.json();
+                const savedFavs = JSON.parse(localStorage.getItem('adminAppFavs')) || [];
+
+                cardContainer.innerHTML = ''; // Clear loader
+
+                apps.forEach(app => {
+                    const isFav = savedFavs.includes(app.id);
+                    const heartClass = isFav ? "fa-solid fa-heart text-red-500" : "fa-regular fa-heart text-gray-300";
+                    
+                    // Dynamic HTML Generation for Cards
+                    const cardHTML = `
+                        <div class="app-card relative bg-white dark:bg-gray-800 rounded-[20px] p-4 shadow-lg flex flex-col justify-between aspect-square group border border-gray-100 dark:border-gray-700" 
+                             data-id="${app.id}" data-name="${app.name.toLowerCase()}">
+                            
+                            <span class="absolute top-3 left-3 text-[10px] font-bold bg-gray-100 dark:bg-gray-700 text-gray-500 px-2 py-0.5 rounded-md">ID: ${app.id}</span>
+                            
+                            <button class="absolute top-3 right-3 fav-btn z-10 transition-transform active:scale-90" onclick="toggleFav(this, '${app.id}')">
+                                <i class="${heartClass} text-lg"></i>
+                            </button>
+
+                            <div class="mt-4 w-12 h-12 rounded-full bg-${app.color}-100 dark:bg-${app.color}-900/30 flex items-center justify-center text-${app.color}-600 dark:text-${app.color}-400 text-xl mx-auto transition-transform group-hover:scale-110">
+                                <i class="${app.icon}"></i>
+                            </div>
+
+                            <h3 class="text-center text-sm font-bold mt-2 leading-tight text-gray-800 dark:text-gray-100">${app.name}</h3>
+                            
+                            <a href="${app.link}" class="mt-2 w-full py-2 bg-gray-50 dark:bg-gray-700 rounded-xl text-xs font-semibold text-center text-gray-600 dark:text-gray-300 hover:bg-${app.color}-500 hover:text-white transition-colors">
+                                Open <i class="fa-solid fa-arrow-right ml-1"></i>
+                            </a>
+                        </div>
+                    `;
+                    cardContainer.innerHTML += cardHTML;
+                });
+
+            } catch (error) {
+                console.error("Error loading apps:", error);
+                cardContainer.innerHTML = '<div class="col-span-2 text-center text-red-500">Failed to load apps. Check JSON file.</div>';
+            }
+        }
+
+        // ================= BANNER LOGIC =================
+        function getSlides() { return document.getElementsByClassName("ad-slide"); }
+
+        function showSlide(n) {
+            const slides = getSlides();
+            if (slides.length === 0) return;
+            if (n >= slides.length) slideIndex = 0;
+            if (n < 0) slideIndex = slides.length - 1;
+            
+            for (let i = 0; i < slides.length; i++) {
+                slides[i].classList.remove("active");
+                slides[i].style.display = "none";
+            }
+            slides[slideIndex].classList.add("active");
+            slides[slideIndex].style.display = "block";
+        }
+
+        function changeAd(n) {
+            clearInterval(autoSlideInterval);
+            slideIndex += n;
+            showSlide(slideIndex);
+            startAutoSlide();
+        }
+
+        function startAutoSlide() {
+            if (autoSlideInterval) clearInterval(autoSlideInterval);
+            autoSlideInterval = setInterval(() => {
+                slideIndex++;
+                showSlide(slideIndex);
+            }, 5000);
+        }
+
+        // ================= SEARCH LOGIC =================
+        document.getElementById('searchInput').addEventListener('input', function() {
+            const filter = this.value.toLowerCase();
+            let visibleCount = 0;
+            document.querySelectorAll('.app-card').forEach(card => {
+                const name = card.getAttribute('data-name');
+                const id = card.getAttribute('data-id');
+                if ((name && name.includes(filter)) || (id && id.includes(filter))) {
+                    card.style.display = "flex";
+                    visibleCount++;
+                } else {
+                    card.style.display = "none";
+                }
+            });
+            document.getElementById('noResults').classList.toggle('hidden', visibleCount > 0);
+        });
+
+        // ================= FAV & THEME LOGIC =================
+        function toggleFav(btn, id) {
+            const cardId = String(id);
+            let favs = JSON.parse(localStorage.getItem('adminAppFavs')) || [];
+            let isFav = false;
+
+            if (favs.includes(cardId)) {
+                favs = favs.filter(fav => fav !== cardId);
+            } else {
+                favs.push(cardId);
+                isFav = true;
+            }
+            localStorage.setItem('adminAppFavs', JSON.stringify(favs));
+            
+            // Update UI
+            const icon = btn.querySelector('i');
+            if (isFav) {
+                icon.className = "fa-solid fa-heart text-red-500 text-lg";
+            } else {
+                icon.className = "fa-regular fa-heart text-gray-300 text-lg";
+            }
+        }
+
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const isDark = html.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            document.getElementById('themeIcon').className = isDark ? "fa-solid fa-sun text-lg" : "fa-solid fa-moon text-lg";
+        }
+    </script>
+</body>
+</html>
