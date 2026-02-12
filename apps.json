@@ -35,7 +35,7 @@
     "id": "05",
     "name": "Only add json ",
     "icon": "fa-solid fa-database",
-    "color": "Blue ",
+    "color": "blue",
     "link": "only-add.html",
     "description": ""
   },
@@ -43,7 +43,7 @@
     "id": "06",
     "name": "My pdf assets",
     "icon": "fa-solid fa-database",
-    "color": "Red",
+    "color": "red",
     "link": "https://nabendudebnathbharatiya-bot.github.io/My-pdf-assets/",
     "description": ""
   },
@@ -51,8 +51,16 @@
     "id": "07",
     "name": "My app assets",
     "icon": "fa-solid fa-database",
-    "color": "Red",
+    "color": "red",
     "link": "https://nabendudebnathbharatiya-bot.github.io/my-app-assets/",
     "description": ""
+  },
+  {
+    "id": "08",
+    "name": "All Assets Traker Tool",
+    "icon": "fa-solid fa-folder-tree",
+    "color": "green",
+    "link": "https://nabendudebnathbharatiya-bot.github.io/All-Assets-traker-tool/",
+    "description": ""
   }
-    ]
+]
