@@ -1,11 +1,11 @@
 [
   {
     "id": "01",
-    "name": "MY DIRECTORY MAP",
+    "name": "chakradham-online",
     "icon": "fa-solid fa-folder-tree",
     "color": "blue",
-    "link": "https://nabendudebnathbharatiya-bot.github.io/Main-diectory-map/",
-    "description": "Manage all digital assets."
+    "link": "https://nabendudebnathbharatiya-bot.github.io/chakradhamlandingpage/",
+    "description": "landing page of website"
   },
   {
     "id": "02",
@@ -65,10 +65,18 @@
   },
   {
     "id": "09",
-    "name": "Chakradham cosmik HEALING",
+    "name": "Chakradham cosmic healing",
     "icon": "fa-solid fa-folder-tree",
     "color": "green",
     "link": "https://nabendudebnathbharatiya-bot.github.io/chakradham-cosmic-healing-app-/",
     "description": ""
+  },
+    {
+    "id": "10",
+    "name": "assetspro manager",
+    "icon": "fa-solid fa-folder-tree",
+    "color": "green",
+    "link": "assetspro.html",
+    "description": "github push ready..."
   }
 ]
